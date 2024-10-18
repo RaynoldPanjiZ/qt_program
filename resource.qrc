@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icon/aery_logo.ico</file>
+        <file>icon/aery_logo.png</file>
+        <file>icon/aery_rm.png</file>
+        <file>icon/arrow-down.svg</file>
+        <file>icon/arrow-up.svg</file>
+        <file>icon/chevron-down.svg</file>
+        <file>icon/chevron-right.svg</file>
+        <file>icon/fullscreen1.png</file>
+        <file>icon/grid1_.png</file>
+        <file>icon/grid4.png</file>
+        <file>icon/grid4_.png</file>
+        <file>icon/grid9_.png</file>
+        <file>icon/lock (1).png</file>
+        <file>icon/lock.png</file>
+        <file>icon/user.png</file>
+        <file>icon/user.svg</file>
+    </qresource>
+    <qresource prefix="/stylesheet">
+        <file>style/style.qss</file>
+        <file>style/style_form.qss</file>
+    </qresource>
+</RCC>
