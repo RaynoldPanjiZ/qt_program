@@ -75,6 +75,7 @@ void MainWindow::on_system_log_clicked()
 
 void MainWindow::on_exit_btn_clicked()
 {
-    this->close();
+//    this->close();
+    QApplication::quit();
 }
 

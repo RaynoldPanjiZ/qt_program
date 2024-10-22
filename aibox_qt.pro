@@ -2,9 +2,14 @@ QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += link_pkgconfig
+PKGCONFIG += opencv4
+
+
 TARGET = AIbox_GUI
 TEMPLATE = app
 
+DEFINES += Q_COMPILER_INITIALIZER_LISTS
 
 SOURCES += main.cpp \
     form_ui/mainwindow.cpp \
@@ -45,6 +50,7 @@ FORMS += \
     form_ui/sidemenu/custom_zone/customzone.ui \
     form_ui/sidemenu/event_setting/eventsetting.ui \
     form_ui/sidemenu/event_setting/objrealtime.ui \
+    form_ui/sidemenu/event_setting/selectdata.ui \
     form_ui/sidemenu/network_setting/netsetting.ui \
     form_ui/sidemenu/surveillance_area/camselection.ui \
     form_ui/sidemenu/surveillance_area/surveillancearea.ui \

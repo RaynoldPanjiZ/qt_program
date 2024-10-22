@@ -21,4 +21,17 @@
         <file>style/style.qss</file>
         <file>style/style_form.qss</file>
     </qresource>
+    <qresource prefix="/datas">
+        <file>datas/aiEngineUpdate.json</file>
+        <file>datas/cameraMapManage.json</file>
+        <file>datas/dataPerson.json</file>
+        <file>datas/dataPerson2.json</file>
+        <file>datas/dataVehicle.json</file>
+        <file>datas/eventSetting.json</file>
+        <file>datas/objTracking.json</file>
+        <file>datas/systemLog.json</file>
+        <file>datas/systemSetting.json</file>
+        <file>datas/userDefined_data.json</file>
+        <file>datas/userManagement.json</file>
+    </qresource>
 </RCC>
