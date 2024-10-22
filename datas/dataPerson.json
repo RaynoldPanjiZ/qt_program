@@ -1,0 +1,43 @@
+[
+    {
+        "name": "Hong Gil Dong",
+        "img": "imgs/test.jpg",
+        "gender": "Male",
+        "hairstyle": "Long",
+        "attribute": [
+            "Hat",
+            "Bag",
+            "Mask",
+            "Glasses"
+        ]
+    },
+    {
+        "name": "test",
+        "img": "imgs/test.jpg",
+        "gender": "Male",
+        "hairstyle": "Short",
+        "attribute": [
+            "Hat",
+            "Bag",
+            "Mask"
+        ]
+    },
+    {
+        "name": "test233",
+        "img": "./imgs/profile/p_1.jpg",
+        "gender": "Male",
+        "hairstyle": "Long",
+        "attribute": []
+    },
+    {
+        "name": "test",
+        "img": "./imgs/profile/p_17.jpg",
+        "gender": "Male",
+        "hairstyle": "Short",
+        "attribute": [
+            "Hat",
+            "Bag",
+            "Mask"
+        ]
+    }
+]
