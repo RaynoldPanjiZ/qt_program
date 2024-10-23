@@ -55,6 +55,8 @@ ObjRealtime::ObjRealtime(QWidget *parent) :
 
     connect(ui->startSearch_btn, &QPushButton::clicked, this, &ObjRealtime::handleFilter);
     connect(ui->searchResult_btn, &QPushButton::clicked, this, &ObjRealtime::show_filter);
+
+    connect(ui->close_btn, &QPushButton::clicked, this, &ObjRealtime::close);
 }
 
 ObjRealtime::~ObjRealtime()
@@ -67,6 +69,8 @@ void ObjRealtime::select_form(){
     dialog = new QDialog(this);
     Ui::SelectData dialogUi;
     dialogUi.setupUi(dialog);
+    connect(dialogUi.cancel_btn, &QPushButton::clicked, dialog, &QDialog::reject);
+
 
     QTableWidget *tb_show = dialogUi.tb_show;
     QStringList headerItems;
@@ -115,11 +119,18 @@ void ObjRealtime::select_form(){
             QString attributesStr = attrList.join(", ");
             tb_show->setItem(row, 5, new QTableWidgetItem(attributesStr));
 
-            QStringList vehicleList;
-            for (const QJsonValue &attr : obj["vehicles"].toArray()) {
-                vehicleList << attr.toString();
+            QString vehiclesStr;
+            if(obj["vehicles"].toArray().empty()){
+                vehiclesStr = "None";
+            } else if (obj["vehicles"].toArray().size() >= 0) {
+                QStringList vehicleList;
+                for (const QJsonValue &attr : obj["vehicles"].toArray()) {
+                    vehicleList << attr.toString();
+                }
+                vehiclesStr = vehicleList.join(", ");
+            } else {
+                vehiclesStr = obj["vehicles"].toArray()[0].toString();
             }
-            QString vehiclesStr = vehicleList.join(", ");
             tb_show->setItem(row, 6, new QTableWidgetItem(vehiclesStr));
 
         } else if (form == "Vehicle") {
@@ -129,9 +140,13 @@ void ObjRealtime::select_form(){
             tb_show->setItem(row, 4, new QTableWidgetItem(obj["model"].toString()));
             tb_show->setItem(row, 5, new QTableWidgetItem(obj["color"].toString()));
 
-            int personId = obj["person_id"].toInt();
-            if (personId >= 0 && personId < datas1.size()) {
-                tb_show->setItem(row, 6, new QTableWidgetItem(datas1[personId].toObject()["name"].toString()));
+            QJsonValue personId = obj["person_id"];
+            int Id_int = personId.toInt();
+            if (personId.isBool() && personId.toBool() == false){
+                tb_show->setItem(row, 6, new QTableWidgetItem("None"));
+            } else if (Id_int >= 0) {
+//                qDebug() << "\n AA" << personId << "\n\n";
+                tb_show->setItem(row, 6, new QTableWidgetItem(datas1[Id_int].toObject()["name"].toString()));
             }
         }
         connect(tb_show, &QTableWidget::cellClicked, this, &ObjRealtime::selected_row);
@@ -320,11 +335,17 @@ void ObjRealtime::handleFilter() {
                 // Assuming "vehicles" is a JSON array in the person object
                 QJsonArray vehicles = fil1["vehicles"].toArray();
                 if (vehicles.contains(fil2["vehicle_no"])) {
-                    QJsonObject combined = fil1;
-                    combined["vehicles"] = fil2["vehicle_no"];
-                    combined["car_type"] = fil2["type"];
-                    combined["car_brand"] = fil2["brand"];
-                    combined["car_model"] = fil2["model"];
+                    QJsonObject combined;
+                    combined["id"] = fil1["id"];
+                    combined["name"] = fil1["name"];
+                    combined["img"] = fil1["img"];
+                    combined["gender"] = fil1["gender"];
+                    combined["hairstyle"] = fil1["hairstyle"];
+                    combined["attribute"] = fil1["attribute"];
+                    combined["vehicle_no"] = fil2["vehicle_no"];
+                    combined["type"] = fil2["type"];
+                    combined["brand"] = fil2["brand"];
+                    combined["model"] = fil2["model"];
                     combined["color"] = fil2["color"];
                     filtered_datas.append(combined);
                 }
@@ -340,20 +361,29 @@ void ObjRealtime::handleFilter() {
             // Assuming you have logic to find corresponding person_id
             QJsonObject fil2 = fil2Val.toObject();
             if (fil2.contains("person_id")) {
-                int personId = fil2["person_id"].toInt();
-                for (const QJsonValue &d1Val : datas1) {
-                    QJsonObject d1 = d1Val.toObject();
-                    if (d1["id"].toInt() == personId) {
-                        combined = d1;
-                        break;
+                // p
+                QJsonValue personId = fil2["person_id"];
+                int Id_int = personId.toInt();
+                if (!personId.isBool() && Id_int >= 0){
+                // int personId = fil2["person_id"].toInt();
+                    for (const QJsonValue &d1Val : datas1) {
+                        QJsonObject d1 = d1Val.toObject();
+                        if (d1["id"].toInt() == Id_int) {
+                            combined = d1;
+                            break;
+                        }
                     }
                 }
             }
 
+            for (const QString &key : fil2.keys()) {
+                combined.insert(key, fil2.value(key));  // Jika ada key yang sama, nilai dari fill2 akan menggantikan yang ada di combined
+            }
             filtered_datas.append(combined);
-            filtered_datas.append(fil2);
+
         }
     }
+//    qDebug() << "Datas" << filtered_datas << "\n--\n";
 
     if (!filtered_datas.isEmpty()) {
         QMessageBox::information(this, "Searching info", QString("Filtered data: %1").arg(filtered_datas.size()));
@@ -378,13 +408,19 @@ void ObjRealtime::show_filter() {
     QList<QJsonObject> data_to_show = filtered_datas;
 //    qDebug() << data_to_show;
 
+    QString form_filter;
     if (!data_to_show.isEmpty()) {
         // Tentukan header tabel berdasarkan jumlah kolom
         QStringList header_items;
         if (data_to_show[0].keys().size() == 7) {
             header_items << "No." << "Name" << "Img" << "Gender" << "Hairstyle" << "Attribute" << "Vehicle No";
+            form_filter = "Person";
+        } else if (data_to_show[0].keys().size() == 6) {
+            header_items << "Vehicle No" << "Car Type" << "Brand" << "Model" << "Color";
+            form_filter = "Vehicle";
         } else {
             header_items << "No." << "Name" << "Img" << "Gender" << "Hairstyle" << "Attribute" << "Vehicle No" << "Car Type" << "Brand" << "Model" << "Color";
+            form_filter = "Person_Vehicle";
         }
 
         // Mengatur jumlah baris dan kolom tabel
@@ -399,7 +435,7 @@ void ObjRealtime::show_filter() {
         for (int i = 0; i < header_items.size(); ++i) {
             QTableWidgetItem *hItem = new QTableWidgetItem(header_items[i]);
             tb_show->setHorizontalHeaderItem(i, hItem);
-            if (i == 0) {
+            if (header_items[i] == "No.") {
                 tb_show->setColumnWidth(i, 20); // Kolom No.
             } else if (i == 1) {
                 tb_show->setColumnWidth(i, 100); // Kolom Name
@@ -414,47 +450,127 @@ void ObjRealtime::show_filter() {
         for (int row_id = 0; row_id < data_to_show.size(); ++row_id) {
             const QJsonObject &data = data_to_show[row_id];
             for (const QString &key : data.keys()) {
-                qDebug() << "data " << data.value(key).toVariant();
+//                qDebug() << "data " << data.value(key).toVariant();
                 QVariant data_value = data.value(key).toVariant();
                 QString value = "";
                 int i = 0;
 
-                // list to string
-                if (data_value.toStringList().size() > 1) {
-                    QStringList attrList;
-                    for (const QString &attr : data_value.toStringList()) {
-                        attrList << attr;
-//                        qDebug() << "data len > 1" << attr;
-                    }
-                    QString attributesStr = attrList.join(", ");
-//                    qDebug() << "STR : " << attributesStr;
+                if(form_filter == "Person"){
+                    // list to string
+                    if (data_value.toStringList().size() > 1) {
+                        QStringList attrList;
+                        for (const QString &attr : data_value.toStringList()) {
+                            attrList << attr;
+                        }
+                        QString attributesStr;
+                        attributesStr = attrList.join(", ");
 
-                    if (key == "attribute") {
-                        value = attributesStr;
-                        i=5;
-                    } else if (key == "vehicles"){
-                        value = attributesStr;
-                        i=6;
-                    }
+                        if (key == "attribute") {
+                            value = attributesStr;
+                            i=5;
+                        } else if (key == "vehicles"){
+                            value = attributesStr;
+                            i=6;
+                        }
 
-                } else {
-                    if (key == "id") {
-                        value = QString::number(row_id + 1);
+                    } else {
+                        if (key == "id") {
+                            value = QString::number(row_id + 1);
+                            i=0;
+                        } else if (key == "name"){
+                            value = data_value.toString();
+                            i=1;
+                        } else if (key == "img") {
+                            value = data_value.toString();
+                            i=2;
+                        } else if (key == "gender") {
+                            value = data_value.toString();
+                            i=3;
+                        } else if (key == "hairstyle") {
+                            value = data_value.toString();
+                            i=4;
+                        } else if (key == "attribute") {
+                            if(data_value.toStringList().empty()){
+                                value = "None";
+                            } else {
+                                value = data_value.toStringList()[0];
+                            }
+                            i=5;
+                        } else if (key == "vehicles") {
+                            if(data_value.toStringList().empty()){
+                                value = "None";
+                            } else {
+                                value = data_value.toStringList()[0];
+                            }
+                            i=6;
+                        }
+                    }
+                } else if(form_filter == "Vehicle"){
+                    if (key == "vehicle_no") {
                         i=0;
-                    } else if (key == "name"){
-                        value = data_value.toString();
+                    } else if (key == "type"){
                         i=1;
-                    } else if (key == "img") {
-                        value = data_value.toString();
+                    } else if (key == "brand") {
                         i=2;
-                    } else if (key == "gender") {
-                        value = data_value.toString();
+                    } else if (key == "model") {
                         i=3;
-                    } else if (key == "hairstyle") {
-                        value = data_value.toString();
+                    } else if (key == "color") {
                         i=4;
+                    } else if (key == "person_id") {
+                        i=5;
+                    }
+                    value = data_value.toString();
+                } else if(form_filter == "Person_Vehicle"){
+                    if (data_value.toStringList().size() > 1) {
+                        QStringList attrList;
+                        for (const QString &attr : data_value.toStringList()) {
+                            attrList << attr;
+                        }
+                        QString attributesStr;
+                        attributesStr = attrList.join(", ");
+
+                        if (key == "attribute") {
+                            value = attributesStr;
+                            i=5;
+                        } else if (key == "vehicles"){
+                            value = attributesStr;
+                            i=6;
+                        }
+
+                    } else {
+                        value = data_value.toString();
+                        if (key == "id") {
+                            value = QString::number(row_id + 1);
+                            i=0;
+                        } else if (key == "name"){
+                            i=1;
+                        } else if (key == "img") {
+                            i=2;
+                        } else if (key == "gender") {
+                            i=3;
+                        } else if (key == "hairstyle") {
+                            i=4;
+                        } else if (key == "attribute") {
+                            if(data_value.toStringList().empty()){
+                                value = "None";
+                            } else {
+                                value = data_value.toStringList()[0];
+                            }
+                            i=5;
+                        } else if (key == "vehicle_no") {
+                            i=6;
+                        } else if (key == "type"){
+                            i=7;
+                        } else if (key == "brand") {
+                            i=8;
+                        } else if (key == "model") {
+                            i=9;
+                        } else if (key == "color") {
+                            i=10;
+                        }
                     }
                 }
+
 
                 QTableWidgetItem *it = new QTableWidgetItem(value);
                 it->setTextAlignment(Qt::AlignCenter);

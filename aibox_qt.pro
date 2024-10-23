@@ -2,8 +2,8 @@ QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += link_pkgconfig
-PKGCONFIG += opencv4
+#CONFIG += link_pkgconfig
+#PKGCONFIG += opencv4
 
 
 TARGET = AIbox_GUI
