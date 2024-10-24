@@ -58,6 +58,7 @@ FORMS += \
     form_ui/sidemenu/system_log/manualdelete.ui \
     form_ui/sidemenu/system_log/systemlog.ui \
     form_ui/sidemenu/system_setting/systemsetting.ui \
+    form_ui/sidemenu/user_management/changepass.ui \
     form_ui/sidemenu/user_management/usrmgn.ui
 
 RESOURCES += \

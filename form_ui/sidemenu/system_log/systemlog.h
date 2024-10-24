@@ -33,6 +33,8 @@ private slots:
     void on_btn_autoDel_clicked();
 
     void updateTable();
+    void dataOperationPages(int event);
+    std::tuple<int, int, int> numPageFilter(const QList<QJsonObject> &dataToShow);
 
 private:
     Ui::SystemLog *ui;
@@ -40,6 +42,7 @@ private:
     AutoDelete *auto_delete;
 
     QList<QJsonObject> datas;
+    int currPage = 1;
     QTimer *timerFetch;
 
     void setupUI();
