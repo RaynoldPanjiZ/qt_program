@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QLabel>
 #include <QRadioButton>
-//#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 
 namespace Ui {
 class CamSelection;
@@ -26,7 +26,7 @@ private slots:
 private:
     Ui::CamSelection *ui;
     QList<QStringList> datas;
-//    cv::VideoCapture camera;
+    cv::VideoCapture camera;
     QTimer *timer;
     QLabel *label_cam;
 };

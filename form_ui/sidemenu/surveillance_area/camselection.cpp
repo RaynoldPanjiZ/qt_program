@@ -87,31 +87,31 @@ CamSelection::~CamSelection()
 void CamSelection::selectedRow(int rowIdx, QRadioButton *radioWidget) {
     // Menggunakan OpenCV untuk menangkap stream video
     QString rtsp_url = datas[rowIdx][3];
-//    camera.open(rtsp_url.toStdString());
+    camera.open(rtsp_url.toStdString());
 
-//    if (!camera.isOpened()) {
-//        qDebug() << "Error opening video stream";
-//        return;
-//    }
-//    // Timer untuk memperbarui frame setiap 30ms
-//       timer = new QTimer(this);
-//       connect(timer, &QTimer::timeout, this, &CamSelection::displayVid);
-//       timer->start(30);
+    if (!camera.isOpened()) {
+        qDebug() << "Error opening video stream";
+        return;
+    }
+    // Timer untuk memperbarui frame setiap 30ms
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &CamSelection::displayVid);
+    timer->start(30);
 
     qDebug() << rtsp_url;
 }
 
 void CamSelection::displayVid() {
-//   cv::Mat frame;
-//   if (camera.read(frame)) {
-//       cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+    cv::Mat frame;
+    if (camera.read(frame)) {
+       cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
 
-//       QImage img(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
-//       QPixmap pixmap = QPixmap::fromImage(img);
+       QImage img(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
+       QPixmap pixmap = QPixmap::fromImage(img);
 
-//       // Set pixmap to label_cam
-//       ui->label_cam->setPixmap(pixmap);
-//       ui->label_cam->setScaledContents(true);
-//   }
+       // Set pixmap to label_cam
+       ui->label_cam->setPixmap(pixmap);
+       ui->label_cam->setScaledContents(true);
+    }
     qDebug() << "display";
 }
